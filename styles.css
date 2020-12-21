@@ -1,3 +1,9 @@
+footer{
+    position: fixed;
+    bottom: 0px;    
+    left: 50%;
+}
+
 .centered{
     display: table;
     margin-right: auto;
@@ -56,4 +62,16 @@ position: absolute;
 top: 75%;
 left: 50%;
 transform: translate(-50%, -50%);
+}
+
+.self-intro{
+    font-family: 'sans-serif', Helvetica, monospace; 
+    font-size: 16px;
+    line-height: 2;
+}
+
+.section-header{
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; 
+    color:black; 
+    font-size: 26px;
 }
