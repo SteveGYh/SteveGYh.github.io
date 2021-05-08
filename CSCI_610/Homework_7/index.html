@@ -2,6 +2,15 @@
 <head>
     <title>CSCI-510: Assn 6 - Materials and Shading</title>
     
+    <!-- texture images -->
+    <img id="world-texture" src="1_earth_16k.jpg" style="display: none;"> </img>
+    
+    <!-- texture images -->
+    <img id="moon-texture" src="lroc_color_poles_1k.jpeg" style="display: none;"> </img>
+    
+    <!-- texture images -->
+    <img id="brick-texture" src="brick.jpeg" style="display: none;"> </img>
+
     <!-- vertex Shader -->
     <script id="sphereMap-V"  type="x-shader/x-vertex">
     #version 300 es
@@ -90,40 +99,37 @@
     <!-- include the main tesselation functions -->
     <script type="text/javascript" src="./textureMain.js"></script>
     
-    <!-- texture images -->
-    <img id="world-texture" src="1_earth_16k.jpg" style="display: none;"> </img>
-    
     <!-- keyboard functions -->
     <script type="text/javascript">
       function gotKey (event) {
       
-      var key = event.key;
-      
-      //  change object type
-      if (key == 'c') {
-          nowShowing = 'Cube';
-          angles = cube_angles;
+        var key = event.key;
+        
+        //  change object type
+        if (key == 'c') {
+            nowShowing = 'Cube';
+            angles = cube_angles;
+        }
+        if (key == 's') {
+            nowShowing = 'Sphere';
+            angles = sphere_angles;
+        }
+        
+        // change texture
+        if (key == '1') curTexture = 'globe';
+        if (key == '2') curTexture = 'myimage';
+        if (key == '3') curTexture = 'proc';
+        
+        //  incremental rotation
+        if (key == 'x') angles[0] -= angleInc;
+        if (key == 'y') angles[1] -= angleInc;
+        if (key == 'z') angles[2] -= angleInc;
+        if (key == 'X') angles[0] += angleInc;
+        if (key == 'Y') angles[1] += angleInc;
+        if (key == 'Z') angles[2] += angleInc;
+            
+        draw();
       }
-      if (key == 's') {
-          nowShowing = 'Sphere';
-          angles = sphere_angles;
-      }
-      
-      // change texture
-      if (key == '1') curTexture = 'globe';
-      if (key == '2') curTexture = 'myimage';
-      if (key == '3') curTexture = 'proc';
-      
-      //  incremental rotation
-      if (key == 'x') angles[0] -= angleInc;
-      if (key == 'y') angles[1] -= angleInc;
-      if (key == 'z') angles[2] -= angleInc;
-      if (key == 'X') angles[0] += angleInc;
-      if (key == 'Y') angles[1] += angleInc;
-      if (key == 'Z') angles[2] += angleInc;
-          
-      draw();
-    }
     </script>
     
   <script type="text/javascript">
@@ -161,6 +167,21 @@
                <td>s</td>
                <td>Select the sphere as the current shape</td>
                </tr>
+              </tr>
+              <tr>
+              <td>1</td>
+              <td>Select the globe as the current texture</td>
+              </tr>
+              </tr>
+              <tr>
+              <td>2</td>
+              <td>Select the customized image as the current texture</td>
+              </tr>
+              </tr>
+              <tr>
+              <td>3</td>
+              <td>Select the procedural as the current texture</td>
+              </tr>
                </tbody>
                </table>
                

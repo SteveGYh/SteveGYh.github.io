@@ -6,9 +6,13 @@
 
   // The programs
   let sphereGlobeProgram;
+  let myimageProgram;
+  let procProgram;
 
   // the textures
   let worldTexture;
+  let moonTexture;
+  let procTexture;
   
   // VAOs for the objects
   var mySphere = null;
@@ -26,7 +30,7 @@
   var sphere_angles = [180.0, 180.0, 0.0];
   var angles = sphere_angles;
   var angleInc = 5.0;
-
+  
 
 //
 // load up the textures you will use in the shader(s)
@@ -36,6 +40,7 @@
 //
 function setUpTextures(){
     
+    gl.useProgram(sphereGlobeProgram);
     // get some texture space from the gpu
     worldTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, worldTexture);
@@ -43,17 +48,73 @@ function setUpTextures(){
     // load the actual image
     var worldImage = document.getElementById ('world-texture')
     worldImage.crossOrigin = "";
-        
-    // bind the texture so we can perform operations on it
-    gl.bindTexture (gl.TEXTURE_2D, worldTexture);
-        
-    // load the texture data
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, worldImage.width, worldImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, worldImage);
-        
+
+    worldImage.onload = () => {
+
+      // bind the texture so we can perform operations on it
+      gl.bindTexture (gl.TEXTURE_2D, worldTexture);
+      
+      // load the texture data
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, worldImage.width, worldImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, worldImage);
+      // draw();
+    }
+
     // set texturing parameters
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+
+    gl.useProgram(myimageProgram);
+    // get some texture space from the gpu
+    moonTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, moonTexture);
+    
+    // load the actual image
+    var moonImage = document.getElementById ('moon-texture')
+    moonImage.crossOrigin = "";
+        
+    moonImage.onload = () => {
+
+      // bind the texture so we can perform operations on it
+      gl.bindTexture (gl.TEXTURE_2D, moonTexture);
+      
+      // load the texture data
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, moonImage.width, moonImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, moonImage);
+      // draw();
+    }
+
+    // set texturing parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+
+    gl.useProgram(procProgram);
+    // get some texture space from the gpu
+    procTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, procTexture);
+    
+    // load the actual image
+    var procImage = document.getElementById ('brick-texture')
+    procImage.crossOrigin = "";
+        
+    procImage.onload = () => {
+
+      // bind the texture so we can perform operations on it
+      gl.bindTexture (gl.TEXTURE_2D, procTexture);
+      
+      // load the texture data
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, procImage.width, procImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, procImage);
+      // draw();
+    }
+
+    // set texturing parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    
 }
 
 //
@@ -71,16 +132,42 @@ function drawCurrentShape () {
     // curTexture.   If will have the value of "globe", "myimage" or "proc"
     
     // which program are we using
-    var program = sphereGlobeProgram;
+    var program;
+    if (curTexture == "globe")
+      program = sphereGlobeProgram;
+    else if (curTexture == "myimage")
+      program = myimageProgram;
+    else if (curTexture == "proc")
+      program = procProgram;
     
     // set up your uniform variables for drawing
     gl.useProgram (program);
     
+    if (curTexture == "globe"){
+      gl.activeTexture (gl.TEXTURE0);
+      gl.bindTexture (gl.TEXTURE_2D, worldTexture);
+      gl.uniform1i (program.uTheTexture, 0);
+      program = sphereGlobeProgram;
+    }
+    else if (curTexture == "myimage"){
+      gl.activeTexture (gl.TEXTURE0 + 1);
+      gl.bindTexture (gl.TEXTURE_2D, moonTexture);
+      gl.uniform1i (program.uTheTexture, 1);
+      program = myimageProgram;
+    }
+    else if (curTexture == 'proc')
+      // gl.activeTexture (gl.TEXTURE0 + 2);
+      // gl.bindTexture (gl.TEXTURE_2D, procTexture);
+      // gl.uniform1i (program.uTheTexture, 2);
+      program = procProgram;
+
+
+    // set up your uniform variables for drawing
+    gl.useProgram (program);
+
     // set up texture uniform & other uniforms that you might
     // have added to the shader
-    gl.activeTexture (gl.TEXTURE0);
-    gl.bindTexture (gl.TEXTURE_2D, worldTexture);
-    gl.uniform1i (program.uTheTexture, 0);
+    // gl.activeTexture (gl.TEXTURE0);
     
     // set up rotation uniform
     gl.uniform3fv (program.uTheta, new Float32Array(angles));
@@ -294,6 +381,8 @@ function bindVAO (shape, program) {
 
     // Read, compile, and link your shaders
     sphereGlobeProgram = initProgram('sphereMap-V', 'sphereMap-F');
+    myimageProgram = initProgram('sphereMap-V', 'sphereMap-F');
+    procProgram = initProgram('sphereMap-V', 'sphereMap-F');
     
     // create and bind your current object
     createShapes();
