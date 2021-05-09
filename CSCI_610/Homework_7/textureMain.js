@@ -96,7 +96,7 @@ function setUpTextures(){
     gl.bindTexture(gl.TEXTURE_2D, procTexture);
     
     // load the actual image
-    var procImage = document.getElementById ('brick-texture')
+    var procImage = document.getElementById ('moon-texture')
     procImage.crossOrigin = "";
 
 
