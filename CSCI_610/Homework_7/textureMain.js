@@ -6,8 +6,8 @@
 
   // The programs
   let sphereGlobeProgram;
-  let myimageProgram;
-  let procProgram;
+  // let myimageProgram;
+  // let procProgram;
 
   // the textures
   let worldTexture;
@@ -40,7 +40,7 @@
 //
 function setUpTextures(){
     
-    gl.useProgram(sphereGlobeProgram);
+    // gl.useProgram(sphereGlobeProgram);
     // get some texture space from the gpu
     worldTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, worldTexture);
@@ -56,7 +56,7 @@ function setUpTextures(){
       
       // load the texture data
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, worldImage.width, worldImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, worldImage);
-      // draw();
+      draw();
     }
 
     // set texturing parameters
@@ -65,7 +65,7 @@ function setUpTextures(){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
 
-    gl.useProgram(myimageProgram);
+    // gl.useProgram(myimageProgram);
     // get some texture space from the gpu
     moonTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, moonTexture);
@@ -90,7 +90,7 @@ function setUpTextures(){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
 
-    gl.useProgram(procProgram);
+    // gl.useProgram(procProgram);
     // get some texture space from the gpu
     procTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, procTexture);
@@ -98,6 +98,26 @@ function setUpTextures(){
     // load the actual image
     var procImage = document.getElementById ('brick-texture')
     procImage.crossOrigin = "";
+
+
+    // Generate the procedural texture.
+    var arrayBuffer = new ArrayBuffer(4 * 512 * 256);
+    var dataView = new Uint8Array(arrayBuffer);
+
+    for (var i = 0; i < 32; i+=1) {
+      var color = Math.floor(Math.random() * 256);
+      var color2 = Math.floor(Math.random() * 256);
+      var color3 = Math.floor(Math.random() * 256);
+      for (var j = 0; j < 8; j++){
+        for (var k = 0; k < 512; k++){
+          var start = ((i*8+j)*512+k)*4;
+          dataView[start] = (color + 32 * (k % 32)) % 256;
+          dataView[start+1] = color2;
+          dataView[start+2] = color3;
+          dataView[start+3] = 255;
+        }
+      }
+    }
         
     procImage.onload = () => {
 
@@ -105,7 +125,8 @@ function setUpTextures(){
       gl.bindTexture (gl.TEXTURE_2D, procTexture);
       
       // load the texture data
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, procImage.width, procImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, procImage);
+      // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, procImage.width, procImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, procImage);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, procImage.width, procImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, dataView);
       // draw();
     }
 
@@ -132,42 +153,35 @@ function drawCurrentShape () {
     // curTexture.   If will have the value of "globe", "myimage" or "proc"
     
     // which program are we using
-    var program;
-    if (curTexture == "globe")
-      program = sphereGlobeProgram;
-    else if (curTexture == "myimage")
-      program = myimageProgram;
-    else if (curTexture == "proc")
-      program = procProgram;
+    var program = sphereGlobeProgram;
     
     // set up your uniform variables for drawing
     gl.useProgram (program);
-    
-    if (curTexture == "globe"){
+    console.log("Current texture: " + curTexture);
+    if (curTexture === 'globe'){
       gl.activeTexture (gl.TEXTURE0);
       gl.bindTexture (gl.TEXTURE_2D, worldTexture);
       gl.uniform1i (program.uTheTexture, 0);
-      program = sphereGlobeProgram;
+      // program = sphereGlobeProgram;
+      console.log("First block entered!");
     }
-    else if (curTexture == "myimage"){
+    else if (curTexture === 'myimage'){
       gl.activeTexture (gl.TEXTURE0 + 1);
       gl.bindTexture (gl.TEXTURE_2D, moonTexture);
       gl.uniform1i (program.uTheTexture, 1);
-      program = myimageProgram;
+      // program = myimageProgram;
+      console.log("Second block entered! with curText: " + curTexture);
     }
-    else if (curTexture == 'proc')
-      // gl.activeTexture (gl.TEXTURE0 + 2);
-      // gl.bindTexture (gl.TEXTURE_2D, procTexture);
-      // gl.uniform1i (program.uTheTexture, 2);
-      program = procProgram;
-
+    else if (curTexture === 'proc'){
+      gl.activeTexture (gl.TEXTURE0 + 2);
+      gl.bindTexture (gl.TEXTURE_2D, procTexture);
+      gl.uniform1i (program.uTheTexture, 2);
+      // program = procProgram;
+      console.log("Third block entered! with curText: " + curTexture);
+    }
 
     // set up your uniform variables for drawing
     gl.useProgram (program);
-
-    // set up texture uniform & other uniforms that you might
-    // have added to the shader
-    // gl.activeTexture (gl.TEXTURE0);
     
     // set up rotation uniform
     gl.uniform3fv (program.uTheta, new Float32Array(angles));
@@ -381,8 +395,8 @@ function bindVAO (shape, program) {
 
     // Read, compile, and link your shaders
     sphereGlobeProgram = initProgram('sphereMap-V', 'sphereMap-F');
-    myimageProgram = initProgram('sphereMap-V', 'sphereMap-F');
-    procProgram = initProgram('sphereMap-V', 'sphereMap-F');
+    // myimageProgram = initProgram('sphereMap-V', 'sphereMap-F');
+    // procProgram = initProgram('sphereMap-V', 'sphereMap-F');
     
     // create and bind your current object
     createShapes();
