@@ -8,14 +8,14 @@
     <img id="world-texture" src="1_earth_16k.jpg" style="display: none;"> </img>
     <img id="trunk-texture" src="trunk-texture.jpeg" style="display: none;"> </img>
     <img id="tree-texture" src="tree.jpeg" style="display: none;"> </img>
+    <img id="tower-texture" src="tower-texture.jpg" style="display: none;"> </img>
      
 
      <!-- vertex Shader -->
     <script id="vertex-shader" type="x-shader/x-vertex">
         #version 300 es
         precision mediump float;
-        in vec4 aVertexPosition;
-        in vec3 bary;
+        in vec3 aVertexPosition;
         in vec2 aUV;
         
         // Phong attempt.
@@ -37,7 +37,7 @@
 
         void main()
         {
-            gl_Position = projT * viewT * modelT * scaleT * aVertexPosition;
+            gl_Position = projT * viewT * modelT * scaleT * vec4 (aVertexPosition, 1.0);
             theUV = aUV;
         }
     </script>

@@ -5,10 +5,11 @@
 let gl;
 
 // GLSL programs
-let cylinderProgram;
-let cubeProgram;
-let coneProgram;
-let trunkProgram;
+// let cylinderProgram;
+// let cubeProgram;
+// let coneProgram;
+// let trunkProgram;
+let globeProgram;
 
 // VAOs for the objects
 var myCube = null;
@@ -22,6 +23,7 @@ let grassTexture;
 let brickTexture;
 let trunkTexture;
 let treeTexture;
+let towerTexture;
 
 // rotation
 
@@ -33,19 +35,21 @@ let treeTexture;
 function createShapes() {
 
     myCube = new Cube(20);
-    myCube.VAO = bindVAO (myCube, cubeProgram);
+    // myCube.VAO = bindVAO (myCube, cubeProgram);
+    myCube.VAO = bindVAO (myCube, globeProgram);
 
     myCone = new Cone(30, 30);
-    myCone.VAO = bindVAO (myCone, coneProgram);
+    // myCone.VAO = bindVAO (myCone, coneProgram);
+    myCone.VAO = bindVAO (myCone, globeProgram);
 
-    // mySphere = new Sphere(30, 30);
-    // mySphere.VAO = bindVAO (mySphere, globeProgram);
+    myCylinder = new Cylinder(10, 5);
+    // myCylinder.VAO = bindVAO (myCylinder, cylinderProgram);
+    myCylinder.VAO = bindVAO (myCylinder, globeProgram);
 
-    myCylinder = new Cylinder(20, 5);
-    myCylinder.VAO = bindVAO (myCylinder, cylinderProgram);
 
     myCylinder2 = new Cylinder(20, 5);
-    myCylinder2.VAO = bindVAO (myCylinder2, trunkProgram);
+    // myCylinder2.VAO = bindVAO (myCylinder2, trunkProgram);
+    myCylinder2.VAO = bindVAO (myCylinder2, globeProgram);
 
 }
 
@@ -57,7 +61,7 @@ function createShapes() {
 //
 function setUpCamera() {
   
-  var program = cylinderProgram;
+  var program = globeProgram;
   
   gl.useProgram(program);
   // set up your projection
@@ -74,24 +78,23 @@ function setUpCamera() {
   glMatrix.mat4.perspective(projMatrix, fieldOfViewInRadians, aspectRatio, nearClippingPlaneDistance, farClippingPlaneDistance)
   gl.uniformMatrix4fv (program.uProjT, false, projMatrix);
 
-  
   // set up your view
   // defaut is at (0,0,-5) looking at the origin
   let viewMatrix = glMatrix.mat4.create();
   glMatrix.mat4.lookAt(viewMatrix, [0, 3, -8], [0, 0, 0], [0, 1, 0]);
   gl.uniformMatrix4fv (program.uViewT, false, viewMatrix);
 
-  program = cubeProgram;
-  gl.useProgram(program);
-  // set up your projection
-  // glMatrix.mat4.ortho(projMatrix, -5, 5, -5, 5, 1.0, 300.0);
-  glMatrix.mat4.perspective(projMatrix, fieldOfViewInRadians, aspectRatio, nearClippingPlaneDistance, farClippingPlaneDistance)
-  gl.uniformMatrix4fv (program.uProjT, false, projMatrix);
+  // program = cubeProgram;
+  // gl.useProgram(program);
+  // // set up your projection
+  // // glMatrix.mat4.ortho(projMatrix, -5, 5, -5, 5, 1.0, 300.0);
+  // glMatrix.mat4.perspective(projMatrix, fieldOfViewInRadians, aspectRatio, nearClippingPlaneDistance, farClippingPlaneDistance)
+  // gl.uniformMatrix4fv (program.uProjT, false, projMatrix);
 
-  // set up your view
-  // defaut is at (0,0,-5) looking at the origin
-  glMatrix.mat4.lookAt(viewMatrix, [0, 3, -8], [0, 0, 0], [0, 1, 0]);
-  gl.uniformMatrix4fv (program.uViewT, false, viewMatrix);
+  // // set up your view
+  // // defaut is at (0,0,-5) looking at the origin
+  // glMatrix.mat4.lookAt(viewMatrix, [0, 3, -8], [0, 0, 0], [0, 1, 0]);
+  // gl.uniformMatrix4fv (program.uViewT, false, viewMatrix);
 
 }
 
@@ -119,7 +122,7 @@ function setUpTextures(){
   grassImage.onload = () => {
 
 
-    gl.useProgram(cubeProgram);
+    // gl.useProgram(cubeProgram);
     // bind the texture so we can perform operations on it
     gl.bindTexture (gl.TEXTURE_2D, grassTexture);
     
@@ -133,7 +136,7 @@ function setUpTextures(){
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
-  gl.useProgram(cylinderProgram);
+  // gl.useProgram(cylinderProgram);
   brickTexture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, brickTexture);
 
@@ -143,7 +146,7 @@ function setUpTextures(){
   
   brickImage.onload = () => {
 
-    gl.useProgram(cylinderProgram);
+    // gl.useProgram(cylinderProgram);
 
     // bind the texture so we can perform operations on it
     gl.bindTexture (gl.TEXTURE_2D, brickTexture);
@@ -201,18 +204,41 @@ function setUpTextures(){
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+  towerTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, towerTexture);
+
+  // load the actual image
+  var towerImage = document.getElementById ('tower-texture')
+  towerImage.crossOrigin = "";
+  
+  towerImage.onload = () => {
+
+    // bind the texture so we can perform operations on it
+    gl.bindTexture (gl.TEXTURE_2D, towerTexture);
+    
+    // load the texture data
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, towerImage.width, towerImage.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, towerImage);
+    draw();
+  }
+
+  // set texturing parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       
 }
 
   function drawGroundCube(pos_vec, scale_vec){
-    var program = cubeProgram;
-    gl.useProgram(program);
+    // var program = cubeProgram;
+    // gl.useProgram(program);
+    var program = globeProgram;
     var scaleMatrix;
     let modelMatrix2 = glMatrix.mat4.create();
 
     modelMatrix2 = glMatrix.mat4.create();
-    glMatrix.mat4.rotateY (modelMatrix2,  modelMatrix2, radians(180.0))
-    glMatrix.mat4.translate (modelMatrix2,  modelMatrix2, pos_vec)
+    glMatrix.mat4.rotateY (modelMatrix2,  modelMatrix2, radians(180.0));
+    glMatrix.mat4.translate (modelMatrix2,  modelMatrix2, pos_vec);
     gl.uniformMatrix4fv (program.uModelT, false, modelMatrix2);
 
     scaleMatrix = glMatrix.mat4.create();
@@ -224,22 +250,25 @@ function setUpTextures(){
   }
 
   function drawTowerCyilner(pos_vec, scale_vec){
-    var program = cylinderProgram;
-    gl.useProgram(program);
+    // var program = cylinderProgram;
+    var program = globeProgram;
+    // gl.useProgram(program);
     var scaleMatrix;
     let modelMatrix2 = glMatrix.mat4.create();
 
-    modelMatrix2 = glMatrix.mat4.create();
-    glMatrix.mat4.rotateY (modelMatrix2,  modelMatrix2, radians(180.0))
-    glMatrix.mat4.rotateZ (modelMatrix2,  modelMatrix2, radians(-5))
-    glMatrix.mat4.translate (modelMatrix2,  modelMatrix2, pos_vec)
+    glMatrix.mat4.rotateY (modelMatrix2,  modelMatrix2, radians(180.0));
+    glMatrix.mat4.rotateZ (modelMatrix2,  modelMatrix2, radians(-5));
+    glMatrix.mat4.translate (modelMatrix2,  modelMatrix2, pos_vec);
     gl.uniformMatrix4fv (program.uModelT, false, modelMatrix2);
 
     scaleMatrix = glMatrix.mat4.create();
     glMatrix.mat4.scale(scaleMatrix,  scaleMatrix, scale_vec);
     gl.uniformMatrix4fv (program.uScaleT, false, scaleMatrix);
     // send the model matrix to the shader and draw.
+    // gl.bindVertexArray(myCube.VAO);
     gl.bindVertexArray(myCylinder.VAO);
+    // gl.bindVertexArray(bindVAO (myCylinder, cylinderProgram));
+    // gl.drawElements(gl.TRIANGLES, myCube.indices.length, gl.UNSIGNED_SHORT, 0);
     gl.drawElements(gl.TRIANGLES, myCylinder.indices.length, gl.UNSIGNED_SHORT, 0);
   }
 
@@ -248,8 +277,8 @@ function setUpTextures(){
 //
   function drawShapes() {
     
-    var program = cubeProgram;
-    gl.useProgram(program);
+    var program = globeProgram;
+    // gl.useProgram(program);
 
     var scaleMatrix;
     let modelMatrix2;
@@ -269,8 +298,8 @@ function setUpTextures(){
     drawGroundCube([-1,0,2], [1, 0.5, 1]);
     drawGroundCube([1,0,2], [1, 0.5, 1]);
 
-    program = cylinderProgram;
-    gl.useProgram(program);
+    // program = cylinderProgram;
+    // gl.useProgram(program);
 
     // Draw the tower.
 
@@ -278,13 +307,16 @@ function setUpTextures(){
     var pos_y = 1.2;
     var pos_z = 3.7;
 
-    gl.activeTexture (gl.TEXTURE1);
-    gl.bindTexture (gl.TEXTURE_2D, brickTexture);
-    gl.uniform1i (program.uTheTexture, 1);
+    gl.activeTexture (gl.TEXTURE4);
+    gl.bindTexture (gl.TEXTURE_2D, towerTexture);
+    gl.uniform1i (program.uTheTexture, 4);
 
-    drawTowerCyilner([pos_x, pos_y, pos_z], [0.8, 1, 1]);
-    drawTowerCyilner([pos_x, pos_y+1, pos_z], [0.8, 1, 1]);
-    drawTowerCyilner([pos_x, pos_y+1.7, pos_z], [0.5, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y, pos_z], [0.8, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y+0.5, pos_z], [0.8, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y+1.0, pos_z], [0.8, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y+1.5, pos_z], [0.8, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y+2.0, pos_z], [0.8, 0.5, 1]);
+    drawTowerCyilner([pos_x, pos_y+2.4, pos_z], [0.5, 0.3, 1]);
 
 
     gl.activeTexture (gl.TEXTURE2);
@@ -324,7 +356,7 @@ function setUpTextures(){
     gl.uniformMatrix4fv (program.uScaleT, false, scaleMatrix);
     gl.bindVertexArray(myCone.VAO);
     gl.drawElements(gl.TRIANGLES, myCone.indices.length, gl.UNSIGNED_SHORT, 0);
-
+    
   }
 
 
@@ -361,7 +393,6 @@ function initPrograms(vertexid, fragmentid) {
   // for easy access later in the code
   program.aVertexPosition = gl.getAttribLocation(program, 'aVertexPosition');
   program.aUV = gl.getAttribLocation(program, 'aUV');
-  program.aBary = gl.getAttribLocation(program, 'bary');
   program.uModelT = gl.getUniformLocation (program, 'modelT');
   program.uViewT = gl.getUniformLocation (program, 'viewT');
   program.uProjT = gl.getUniformLocation (program, 'projT');
@@ -391,6 +422,15 @@ function bindVAO (shape, program) {
     
     // add code for any additional vertex attribute
 
+    // create, bind, and fill buffer for uv's
+    // uvs can be obtained from the uv member of the
+    // shape object.  2 floating point values (u,v) per vertex are
+    // stored in this array.
+    let uvBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shape.uv), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(program.aUV);
+    gl.vertexAttribPointer(program.aUV, 2, gl.FLOAT, false, 0, 0);
     
     // Setting up the IBO
     let myIndexBuffer = gl.createBuffer();
@@ -530,10 +570,11 @@ function init() {
   gl.clearDepth(1.0)
 
   // Read, compile, and link your shaders
-  cylinderProgram = initPrograms("vertex-shader", "fragment-shader");
-  cubeProgram = initPrograms("vertex-shader", "fragment-shader");
-  trunkProgram = initPrograms("vertex-shader", "fragment-shader");
-  coneProgram = initPrograms("vertex-shader", "fragment-shader");
+  // cylinderProgram = initPrograms("vertex-shader", "fragment-shader");
+  // cubeProgram = initPrograms("vertex-shader", "fragment-shader");
+  // trunkProgram = initPrograms("vertex-shader", "fragment-shader");
+  // coneProgram = initPrograms("vertex-shader", "fragment-shader");
+  globeProgram = initPrograms("vertex-shader", "fragment-shader");
   
   // create and bind your current object
   createShapes();
