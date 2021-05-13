@@ -15,7 +15,9 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         #version 300 es
         precision mediump float;
-        in vec3 aVertexPosition;
+        in vec3 bary;
+        in vec4 aVertexPosition;
+        
         in vec2 aUV;
         
         // Phong attempt.
@@ -34,10 +36,41 @@
         uniform mat4 scaleT;
 
         out vec2 theUV;
+        out vec3 N;
+        out vec3 L;
+        out vec3 V;
+
+        // Light parameters
+        uniform vec3 ambientLight;
+        uniform vec3 lightPosition;   // in world coords
+        uniform vec3 lightColor;
+
+        uniform vec3 specHighlightColor;
+
+        // Phong parameters
+        uniform float ka;
+        uniform float kd;
+        uniform float ks;
+        uniform float ke;
 
         void main()
         {
-            gl_Position = projT * viewT * modelT * scaleT * vec4 (aVertexPosition, 1.0);
+            // All calculations will be done in camera space
+            mat4 modelView = viewT * modelT;
+            mat4 normalmatrix = transpose(inverse (modelView));
+            
+            vec3 vcam = (modelView * aVertexPosition).xyz;
+            vec3 lcam = (viewT * vec4(lightPosition, 1.0)).xyz;
+            vec3 ncam = (normalmatrix * vec4(aNormal, 1.0)).xyz;
+            ncam = faceforward (ncam, vcam, ncam);
+            
+            // vectors to pass on to Fragment Shader
+            N = normalize (ncam);
+            L = normalize (lcam - vcam);
+            V = -normalize (vcam);
+
+
+            gl_Position = projT * viewT * modelT * scaleT * aVertexPosition;
             theUV = aUV;
         }
     </script>
@@ -47,7 +80,22 @@
          #version 300 es
          precision mediump float;
          
+         in vec3 N;
          in vec2 theUV;
+         
+         in vec3 L;
+         in vec3 V;
+
+         // Light parameters
+         uniform vec3 ambientLight;
+         uniform vec3 lightColor;
+         uniform vec3 specHighlightColor;
+
+         // Phong parameters
+         uniform float ka;
+         uniform float kd;
+         uniform float ks;
+         uniform float ke;
 
          uniform sampler2D theTexture;
 
@@ -57,6 +105,16 @@
 
          void main(void) {
              fragColor = texture (theTexture, theUV);
+             vec3 baseColor = vec3 (fragColor[0], fragColor[1], fragColor[2]);
+
+             vec3 R = normalize (reflect (-L, N));
+             
+             vec3 ambient = ka * ambientLight * baseColor;
+             vec3 diffuse = kd * lightColor * baseColor * max (dot(L, N), 0.0);
+             vec3 spec = ks * specHighlightColor * lightColor * pow (max(dot(R, V), 0.0), ke);
+             
+             // final color
+             fragColor = vec4 (ambient + diffuse + spec, 1.0);
          }
 
      </script>
@@ -97,8 +155,16 @@
               <table border="1">
               <tbody>
               <tr>
-              <td> </td>
-              <td>Press any key to redraw the scene.</td>
+              <td>Press any key to draw the initial scene.</td>
+              </tr>
+              <tr>
+              <td>Press w,a,s,d to move the lightsource in, left, out, right.</td>
+              </tr>
+              <tr>
+              <td>Press r, f to move the lightsource up and down.</td>
+              </tr>
+              <tr>
+              <td>P.S. Vegetation and tower reflects light differently.</td>
               </tr>
               </tbody>
               </table>
@@ -106,8 +172,6 @@
           </td>
       </tr>
   </table>
-  
-  
 
 </body>
 </html>
