@@ -1,33 +1,67 @@
 <html>
 <head>
-    <title>CSCI-510: Assn 5 - Transformation</title>
+    <title>CSCI-610 Final: the leaning tower of pisa</title>
     
-    <!-- include vertex shaders -->
+    <!-- texture images -->
+    <img id="grass-texture" src="grass-texture.jpeg" style="display: none;"> </img>
+    <img id="brick-texture" src="brick.jpeg" style="display: none;"> </img>
+    <img id="world-texture" src="1_earth_16k.jpg" style="display: none;"> </img>
+    <img id="trunk-texture" src="trunk-texture.jpeg" style="display: none;"> </img>
+    <img id="tree-texture" src="tree.jpeg" style="display: none;"> </img>
+     
 
-    <script id="wireframe-V" type="x-shader/x-vertex">
+     <!-- vertex Shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
         #version 300 es
-        in vec3 aVertexPosition;
+        precision mediump float;
+        in vec4 aVertexPosition;
+        in vec3 bary;
+        in vec2 aUV;
         
+        // Phong attempt.
+        in vec3 aNormal;
+
+        // Model transforms
+        uniform mat4 modelT;
+        
+        // view transform
+        uniform mat4 viewT;
+        
+        // projection tramsform
+        uniform mat4 projT;
+        
+        // model scaling
+        uniform mat4 scaleT;
+
+        out vec2 theUV;
+
         void main()
         {
-            gl_Position = aVertexPosition;
+            gl_Position = projT * viewT * modelT * scaleT * aVertexPosition;
+            theUV = aUV;
         }
     </script>
 
-     <!-- wireframe fragment Shaders -->
-     <script id="wireframe-F" type="x-shader/x-fragment">
+     <!-- fragment Shader -->
+     <script id="fragment-shader" type="x-shader/x-fragment">
          #version 300 es
          precision mediump float;
          
+         in vec2 theUV;
+
+         uniform sampler2D theTexture;
+
          // Color that is the result of this shader
          out vec4 fragColor;
 
+
          void main(void) {
-             fragColor = vec4 (0.5, 0.5, 0.5, 1.0 );
+             fragColor = texture (theTexture, theUV);
          }
 
      </script>
-     
+
+
      <!-- Matrix library and code for standard transformations -->
      <script type="text/javascript" src="gl-matrix-min.js"></script>
     
@@ -41,8 +75,7 @@
     <!-- keyboard functions -->
     <script type="text/javascript" src="./event.js"></script>
     
-    <!-- texture images -->
-     <img id="world-texture" src="2_no_clouds_8k.jpg" style="display: none;"> </img>
+    
 
   <script type="text/javascript">
     // Call init once the webpage has loaded
@@ -51,7 +84,7 @@
 </head>
 
 <body>
-  <h1>CSCI-510: Final Exam Image</h1>
+  <h1>CSCI-610 Final: the leaning tower of pisa</h1>
   <table>
       <tr>
           <td><canvas id="webgl-canvas" width="500" height="500">
@@ -65,7 +98,7 @@
               <tbody>
               <tr>
               <td> </td>
-              <td>List any keyboard controls here</td>
+              <td>Press any key to redraw the scene.</td>
               </tr>
               </tbody>
               </table>
